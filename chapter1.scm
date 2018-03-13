@@ -197,10 +197,60 @@
                        (double-tree (lson b))
                        (double-tree (rson b))))))
 
-; exercise 1.33
+
+; exerise 1.33
+(define loop
+  (lambda (red-depth tree)
+    (cond ((integer? (car tree)) red-depth)
+          ((eqv? (car tree) 'red)
+           (set! red-depth (+ red-depth 1))
+           (cons (car tree) (loop red-depth (cadr tree)))
+           (cons (car tree) (loop red-depth (caddr tree))))
+          (else
+           (cons (car tree) (loop red-depth (cadr tree)))
+           (cons (car tree) (loop red-depth (caddr tree))))
+          )))
+        
+       
+
 (define mark-leaves-with-red-depth
-  ( lambda (b)
-     
+  (lambda (tree)
+    (loop (0 tree))))
+    
+
+
+
+
+; exercise 1.34
+(define path
+  (lambda (n bst)
+    (cond ((null? bst) eopl:error)
+          ((= n (car bst)) '())
+          ((> n (car bst)) (cons 'right (path n (caddr bst))))
+          ((< n (car bst)) (cons 'left (path n (cadr bst)))))))
+
+; exercise 1.35
+(define number-leaves
+  (lambda (bintree)
+    (number-leaves-temp 0 bintree)))
+(define n 0)
+(define number-leaves-temp
+  (lambda (bintree)
+    (cond
+      ((null? bintree) '())
+      ((integer? (car bintree)) (n) (set! (+ n 1)))
+      (else (number-leaves-temp (cadr bintree) (caddr bintree))))))
+
+; exercise 1.36
+(define number-elements
+  (lambda (lst)
+    (if (null? lst) '()
+        (g (list 0 (car lst)) (number-elements (cdr lst))))))
+
+(define g
+  (lambda (nelst proced)
+    (cons nelst
+          (map (lambda (ns) (cons (+ (car ns) 1) (cdr ns))) proced))))     
           
     
     
