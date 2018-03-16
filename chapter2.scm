@@ -141,11 +141,49 @@
 
 
 ; exercise 2.11
-
+(define empty-env
+  (lambda ()
+    '()))
+(define extend-env
+  (lambda (var val env)
+    (extend-env* (list var) (list val) env)))
+(define extend-env*
+  (lambda (var val env)
+    (cons (cons vars vals) env)))
+(define reprot-no-binding-found
+ (lambda (search-var env)
+   (epol:error 'there is no binidng for ~s in ~s' search-var env)))
+(define reprot-invalid-env
+  (lambda (env)
+    (epol:error 'wrong environment ~s' env)))
+(define apply-env
+  (lambda (env search-var)
+    (cond ((null? env) (report-no-binding-found))
+          ((and (pair? (car env) (cdr env)))
+               (apply-env (car env) search-var)
+               (apply-env (cdr env) serach-var))
+          )))
+;?????
+          
+    
 
 
 ; exercise 2.12
-
+(define empty-stack
+  (lambda ()
+    'empty-stack))
+(define push
+  (lambda (var stack)
+    
+       (cons var stack)))
+(define pop
+  (lambda (stack)
+    (if (null? stack))
+      (empty-stack)
+      (let (var (car stack))
+       (set! stack (cdr stack))
+       (var))))
+;???? 
 
 
 ; exercise 2.13
@@ -179,7 +217,7 @@
 
 
 ; note 2.3 interfaces for Recursive Data Types
-
+    
 (define occurs-free?
   (lambda (search-var exp)
     (cond
@@ -192,8 +230,7 @@
         (or
          (occurs-free? search-var (app-exp->rator exp))
          (occurs-free? search-var (app-exp->rand exp))))))))
-   
+      
         
         
         
-    
