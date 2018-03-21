@@ -1,4 +1,7 @@
 #lang racket
+(define addx
+  (lambda (x)
+    (+ x 1)))
 
 ; exercise 2.1
 (define N 10)
@@ -17,7 +20,7 @@
 (define predecessor-bigit
   (lambda (n)
     (cond
-      ((null? n) (epol:error ''))
+      ((null? n) (epol:error 'error ))
       ((and ((= 1 n) (cdr n)) (null? (cdr n))) '())
       ((zero? (car n)) (cons (- N 1) (predecessor-bigit (cdr n))))
       (else (cons (- (car n) 1) (cdr n))))))
@@ -105,6 +108,14 @@
 
 
 ; exercise 2.6
+; 1. use pair in list
+; ((a. 1)(b. 2)(c. 3))
+
+; 2. use seperate list for key and vals
+; ((a b c)(1 2 3))
+
+; 3. use pairs in list, but based on key
+
 
 
 
@@ -144,26 +155,43 @@
 (define empty-env
   (lambda ()
     '()))
+
 (define extend-env
   (lambda (var val env)
-    (extend-env* (list var) (list val) env)))
+    (cons list((list var) (list val))
+          env)))
+
 (define extend-env*
-  (lambda (var val env)
-    (cons (cons vars vals) env)))
+  (lambda (var-list val-list env)
+    (if (null? var-list)
+        env
+        (cons list((var-list) (val-list))
+              env))))
+
 (define reprot-no-binding-found
  (lambda (search-var env)
    (epol:error 'there is no binidng for ~s in ~s' search-var env)))
+
 (define reprot-invalid-env
   (lambda (env)
     (epol:error 'wrong environment ~s' env)))
+
 (define apply-env
   (lambda (env search-var)
-    (cond ((null? env) (report-no-binding-found))
-          ((and (pair? (car env) (cdr env)))
-               (apply-env (car env) search-var)
-               (apply-env (cdr env) serach-var))
-          )))
-;?????
+    (if (null? env)
+        (report-no-binding-found search-var)
+        (let ((val (apply-current (caar env) (cadar env) var)))
+          (if (car val)
+              (cdr val)
+              (apply-env (cdr env) search-var))))))
+
+(define apply-current
+  (lambda (vars vals search-var)
+    (if (null? vars)
+        (cons #f '())
+        (if (eqv? (car vars) search-var)
+            (cons #t (car vals))
+            (apply-current (cdr vars) (cdr vals) search-var)))))
           
     
 
@@ -171,19 +199,31 @@
 ; exercise 2.12
 (define empty-stack
   (lambda ()
-    'empty-stack))
+    (lambda (cmd)
+      (cond
+        ((eqv? cmd 'top)
+         (error "try top on empty stack"))
+        ((eqv? cmd 'pop)
+         (error "try pop on empty stack"))
+        (else
+         (error "unkonw cmd on stack"))))))
+
 (define push
-  (lambda (var stack)
-    
-       (cons var stack)))
+  (lambda (save-stack var)
+    (lambda (cmd)
+      (cond
+        ((eqv? cmd 'top) var)
+        ((eqv? cmd 'pop) saved-stack)
+        (else
+         (error 'error))))))
+
 (define pop
   (lambda (stack)
-    (if (null? stack))
-      (empty-stack)
-      (let (var (car stack))
-       (set! stack (cdr stack))
-       (var))))
-;???? 
+    (stack 'pop)))
+
+(define top
+  (lambda (stack)
+    (stack 'top)))
 
 
 ; exercise 2.13
@@ -201,12 +241,14 @@
   (lambda ()
     (lambda (search-var)
       (report-no-binding-found search-var))))
+
 (define extend-env
   (lambda (saved-var saved-val saved-env)
     (lambda (search-var)
       (if (eqv? search-var saved-var)
           saved-val
           (apply-env saved-env search-var)))))
+
 (define apply-env
   (lambda (env search-var)
     (env search-var)))
@@ -231,6 +273,4 @@
          (occurs-free? search-var (app-exp->rator exp))
          (occurs-free? search-var (app-exp->rand exp))))))))
       
-        
-        
         
