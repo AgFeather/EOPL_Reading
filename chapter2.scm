@@ -587,12 +587,78 @@
 ; 2.4 a tool for defining recursive data types
 (define-datatype lc-exp lc-exp?
   (var-exp
-   (var identifier?))
-  (lambda-
+    (var identifier?))
+  (lambda-exp
+    (bound-var identifier?)
+    (body lc-exp?))
+  (app-exp
+    (rator lc-exp?)
+    (rand lc-exp?)))
+
+
+(define occurs-free?
+  (lambda (search-var exp)
+    (cases lc-exp exp
+      (var-exp (var) (eqv? var search-var))
+      (lambda-exp (bound-var body)
+        (and 
+          (not (eqv? search-var bound-var))
+          (occurs-free? search-var body)))
+      (app-exp (rator rand)
+        (or
+          (occurs-free? search-var rator)
+          (occurs-free? search-var rand))))))
 
 
 
 
+
+; 2.21
+(define value?
+  (lambda (v)
+    #t))
+(define empty-env
+  (lambda ()
+    (empty-env-inter)))
+(define extend-env
+  (lambda (var val E)
+    (extend-env-inter var val E)))
+(define apply-env
+  (lambda (var E)
+    (cases env E
+      (empty-env-inter () (error 'apply-env "empty-env"))
+      (extend-env-inter (_var _val _env)
+        (if (eqv? _var var)
+            _val
+            (apply-env var _env)))
+      (apply-env-inter (_var _env) (error 'apply-env "error"))
+      (has-binding-inter (_var _env) (error 'apply-env "error")))))
+
+(define-datatype env env?
+  (empty-env-inter)
+  (apply-env-inter
+    (_var symbol?)
+    (_env env?))
+  (extend-env-inter
+    (_var symbol?)
+    (_val value?)
+    (_env env?))
+  (has-binding-inter
+    (_val symbol?)
+    (_env env?)))
+
+(define has-binding?
+  (lambda (var E)
+    (cases env E
+      (empty-env-inter () #f)
+      (extend-env-inter (_var _val _env)
+                        (if (eqv? _var var)
+                            #t
+                            (has-binding? var _env)))
+      (apply-env-inter (_var _env)
+                       (has-binding? var _env))
+      (has-binding-inter (_var _env)
+                         (has-binding? var _env)))))
 
 
 
